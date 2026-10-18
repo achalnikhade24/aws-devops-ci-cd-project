@@ -1,4 +1,4 @@
-
+```groovy
 pipeline {
     agent any
 
@@ -34,5 +34,17 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy Website') {
+            steps {
+                sh '''
+                    docker stop aws-devops-website || true
+                    docker rm aws-devops-website || true
+                    docker pull "$DOCKERHUB_REPO:latest"
+                    docker run -d --name aws-devops-website -p 8081:80 "$DOCKERHUB_REPO:latest"
+                '''
+            }
+        }
     }
 }
+```
