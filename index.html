@@ -4,24 +4,673 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AWS DevOps CI/CD Project</title>
+
+    <title>AWS DevOps | CI/CD Automation Project</title>
+    <meta name="description" content="AWS DevOps CI/CD project using GitHub, Jenkins, Docker, Docker Hub, EC2 and Nginx.">
 
     <style>
+        :root {
+            --bg: #080b1c;
+            --card: rgba(255, 255, 255, 0.055);
+            --border: rgba(167, 139, 250, 0.23);
+            --purple: #a78bfa;
+            --blue: #60a5fa;
+            --cyan: #67e8f9;
+            --text: #f8fafc;
+            --muted: #a5b4cf;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #0f172a;
-            color: white;
-            text-align: center;
-            min-height: 100vh;
+        html {
+            scroll-behavior: smooth;
         }
 
-        header {
-            padding: 25px 15px;
-            background: #111827;
-            border-bottom: 2px solid #38
+        body {
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background:
+                radial-gradient(ellipse at 15% 10%,
+                    rgba(124, 58, 237, 0.24), transparent 42%),
+                radial-gradient(ellipse at 90% 30%,
+                    rgba(37, 99, 235, 0.21), transparent 40%),
+                radial-gradient(ellipse at 50% 90%,
+                    rgba(14, 165, 233, 0.12), transparent 45%);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .navbar {
+            max-width: 1180px;
+            margin: auto;
+            padding: 22px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 13px;
+            background: linear-gradient(135deg, #8b5cf6, #2563eb);
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.3);
+        }
+
+        .brand-icon svg {
+            width: 25px;
+            height: 25px;
+        }
+
+        .nav-tag {
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 9px 15px;
+            color: var(--muted);
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .hero {
+            max-width: 1050px;
+            margin: auto;
+            padding: 72px 24px 65px;
+            text-align: center;
+            animation: fadeUp 0.8s ease both;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 15px;
+            border: 1px solid var(--border);
+            background: rgba(139, 92, 246, 0.09);
+            border-radius: 30px;
+            color: #c4b5fd;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+
+        .pulse {
+            height: 8px;
+            width: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #4ade80;
+            animation: pulse 1.8s infinite;
+        }
+
+        h1 {
+            margin: 28px auto 20px;
+            font-size: clamp(38px, 7vw, 76px);
+            line-height: 1.08;
+            letter-spacing: -2.7px;
+            font-weight: 850;
+        }
+
+        .gradient-text {
+            background: linear-gradient(
+                100deg,
+                #c4b5fd 5%,
+                #818cf8 45%,
+                #67e8f9 95%
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-description {
+            max-width: 690px;
+            margin: 0 auto;
+            color: var(--muted);
+            font-size: 17px;
+            line-height: 1.9;
+        }
+
+        .hero-buttons {
+            margin-top: 32px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 9px;
+            padding: 14px 21px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+        }
+
+        .button-primary {
+            color: white;
+            background: linear-gradient(110deg, #7c3aed, #2563eb);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.24);
+        }
+
+        .button-secondary {
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        .section {
+            max-width: 1120px;
+            margin: auto;
+            padding: 35px 24px 55px;
+        }
+
+        .section-heading {
+            margin-bottom: 28px;
+            text-align: center;
+        }
+
+        .section-heading h2 {
+            font-size: clamp(25px, 4vw, 36px);
+            letter-spacing: -0.7px;
+            margin-bottom: 12px;
+        }
+
+        .section-heading p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 19px;
+        }
+
+        .card {
+            position: relative;
+            overflow: hidden;
+            min-height: 195px;
+            padding: 25px;
+            border-radius: 19px;
+            border: 1px solid var(--border);
+            background: linear-gradient(
+                145deg,
+                rgba(255, 255, 255, 0.075),
+                rgba(255, 255, 255, 0.018)
+            );
+            backdrop-filter: blur(12px);
+            transition: transform 0.3s, border-color 0.3s,
+                        box-shadow 0.3s;
+            animation: fadeUp 0.7s ease both;
+        }
+
+        .card::after {
+            content: "";
+            position: absolute;
+            width: 110px;
+            height: 110px;
+            right: -55px;
+            top: -55px;
+            border-radius: 50%;
+            background: rgba(129, 140, 248, 0.12);
+            filter: blur(3px);
+            transition: transform 0.4s;
+        }
+
+        .card:hover {
+            transform: translateY(-7px);
+            border-color: rgba(129, 140, 248, 0.65);
+            box-shadow: 0 16px 40px rgba(37, 99, 235, 0.12);
+        }
+
+        .card:hover::after {
+            transform: scale(1.7);
+        }
+
+        .card:nth-child(2) { animation-delay: 0.08s; }
+        .card:nth-child(3) { animation-delay: 0.16s; }
+        .card:nth-child(4) { animation-delay: 0.24s; }
+        .card:nth-child(5) { animation-delay: 0.32s; }
+        .card:nth-child(6) { animation-delay: 0.40s; }
+
+        .card-icon {
+            display: grid;
+            place-items: center;
+            width: 49px;
+            height: 49px;
+            margin-bottom: 20px;
+            border-radius: 14px;
+            background: linear-gradient(
+                135deg,
+                rgba(139, 92, 246, 0.23),
+                rgba(37, 99, 235, 0.22)
+            );
+            border: 1px solid rgba(167, 139, 250, 0.22);
+            font-size: 24px;
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            font-size: 17px;
+        }
+
+        .card p {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .pipeline-panel {
+            padding: 30px;
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            background: rgba(17, 24, 55, 0.58);
+        }
+
+        .pipeline {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 12px;
+            align-items: center;
+        }
+
+        .pipeline-step {
+            min-width: 0;
+            padding: 17px 8px;
+            text-align: center;
+            border: 1px solid rgba(129, 140, 248, 0.2);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        .pipeline-step .emoji {
+            display: block;
+            font-size: 25px;
+            margin-bottom: 12px;
+        }
+
+        .pipeline-step strong {
+            font-size: 12px;
+            display: block;
+            overflow-wrap: anywhere;
+        }
+
+        .pipeline-step small {
+            display: block;
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .pipeline-arrow {
+            color: #a78bfa;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .deployment-banner {
+            margin-top: 22px;
+            padding: 20px;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 15px;
+            background: rgba(34, 197, 94, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 11px;
+            color: #bbf7d0;
+            font-size: 13px;
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        .version {
+            max-width: 1120px;
+            margin: 0 auto 50px;
+            padding: 0 24px;
+        }
+
+        .version-box {
+            padding: 26px;
+            text-align: center;
+            border: 1px solid rgba(103, 232, 249, 0.2);
+            border-radius: 18px;
+            background: linear-gradient(
+                110deg,
+                rgba(124, 58, 237, 0.12),
+                rgba(37, 99, 235, 0.09)
+            );
+        }
+
+        .version-box h3 {
+            margin-bottom: 9px;
+            font-size: 19px;
+        }
+
+        .version-box p {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .version-label {
+            display: inline-block;
+            margin-top: 14px;
+            border-radius: 25px;
+            padding: 8px 14px;
+            color: #a5f3fc;
+            background: rgba(8, 145, 178, 0.13);
+            border: 1px solid rgba(103, 232, 249, 0.18);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        footer {
+            padding: 28px 20px;
+            text-align: center;
+            border-top: 1px solid rgba(167, 139, 250, 0.12);
+            color: #8492b0;
+            font-size: 12px;
+            line-height: 2;
+        }
+
+        footer strong {
+            color: #c4b5fd;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.55;
+                transform: scale(0.8);
+            }
+        }
+
+        @media (max-width: 760px) {
+            .hero {
+                padding-top: 50px;
+            }
+
+            h1 {
+                letter-spacing: -1.5px;
+            }
+
+            .cards {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .pipeline {
+                grid-template-columns: 1fr;
+            }
+
+            .pipeline-arrow {
+                transform: rotate(90deg);
+            }
+
+            .pipeline-panel {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 460px) {
+            .navbar {
+                padding: 17px;
+            }
+
+            .brand {
+                font-size: 15px;
+            }
+
+            .nav-tag {
+                font-size: 10px;
+                padding: 8px 10px;
+            }
+
+            .hero, .section {
+                padding-left: 17px;
+                padding-right: 17px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                min-height: 160px;
+            }
+
+            .hero-description {
+                font-size: 15px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <a href="#" class="brand">
+            <span class="brand-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"
+                     stroke="white" stroke-width="1.8">
+                    <path d="M4 16.5A4.5 4.5 0 0 1 5.5 7.8
+                    6.5 6.5 0 0 1 18 9a4 4 0 0 1 .5 8H16"/>
+                    <path d="m9 15 3-3 3 3M12 12v8"/>
+                </svg>
+            </span>
+            <span>Cloud<span class="gradient-text">Flow</span></span>
+        </a>
+
+        <span class="nav-tag">AWS DEVOPS PROJECT</span>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="eyebrow">
+                <span class="pulse"></span>
+                CI/CD AUTOMATION PROJECT
+            </div>
+
+            <h1>
+                From Code to<br>
+                <span class="gradient-text">Cloud Deployment.</span>
+            </h1>
+
+            <p class="hero-description">
+                A modern AWS DevOps project demonstrating automated
+                builds and container deployment using GitHub, Jenkins,
+                Docker, Docker Hub, EC2 and Nginx.
+            </p>
+
+            <div class="hero-buttons">
+                <a class="button button-primary" href="#architecture">
+                    Explore Architecture <span aria-hidden="true">↗</span>
+                </a>
+
+                <a class="button button-secondary"
+                   href="https://github.com/achalnikhade24/aws-devops-ci-cd-project"
+                   target="_blank" rel="noopener noreferrer">
+                    View GitHub Repository ↗
+                </a>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-heading">
+                <h2>Tools Behind the <span class="gradient-text">Pipeline</span></h2>
+                <p>Six essential technologies working together in this project.</p>
+            </div>
+
+            <div class="cards">
+                <article class="card">
+                    <div class="card-icon" aria-hidden="true">☁️</div>
+                    <h3>AWS EC2</h3>
+                    <p>Cloud compute instance hosting the application and CI/CD environment.</p>
+                </article>
+
+                <article class="card">
+                    <div class="card-icon" aria-hidden="true">🐙</div>
+                    <h3>GitHub</h3>
+                    <p>Source code repository. Commit changes to trigger Jenkins polling.</p>
+                </article>
+
+                <article class="card">
+                    <div class="card-icon" aria-hidden="true">⚙️</div>
+                    <h3>Jenkins</h3>
+                    <p>Automates the pipeline with build, image push and deployment stages.</p>
+                </article>
+
+                <article class="card">
+                    <div class="card-icon" aria-hidden="true">🐳</div>
+                    <h3>Docker</h3>
+                    <p>Packages the website into a portable container image.</p>
+                </article>
+
+                <article class="card">
+                    <div class="card-icon" aria-hidden="true">📦</div>
+                    <h3>Docker Hub</h3>
+                    <p>Stores the latest image so the deployment stage can pull it.</p>
+                </article>
+
+                <article class="card">
+                    <div class="card-icon" aria-hidden="true">🌐</div>
+                    <h3>Nginx</h3>
+                    <p>Serves the website from the Docker container over HTTP.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="section" id="architecture">
+            <div class="section-heading">
+                <h2>CI/CD <span class="gradient-text">Architecture</span></h2>
+                <p>Follow the flow from a code change to a deployed website.</p>
+            </div>
+
+            <div class="pipeline-panel">
+                <div class="pipeline">
+                    <div class="pipeline-step">
+                        <span class="emoji" aria-hidden="true">🐙</span>
+                        <strong>GitHub</strong>
+                        <small>Commit code</small>
+                    </div>
+
+                    <div class="pipeline-step">
+                        <span class="emoji" aria-hidden="true">⚙️</span>
+                        <strong>Jenkins</strong>
+                        <small>Build pipeline</small>
+                    </div>
+
+                    <div class="pipeline-step">
+                        <span class="emoji" aria-hidden="true">🐳</span>
+                        <strong>Docker</strong>
+                        <small>Build image</small>
+                    </div>
+
+                    <div class="pipeline-step">
+                        <span class="emoji" aria-hidden="true">📦</span>
+                        <strong>Docker Hub</strong>
+                        <small>Push / pull image</small>
+                    </div>
+
+                    <div class="pipeline-step">
+                        <span class="emoji" aria-hidden="true">🚀</span>
+                        <strong>AWS EC2</strong>
+                        <small>Run container</small>
+                    </div>
+                </div>
+
+                <div class="deployment-banner">
+                    <span aria-hidden="true">✓</span>
+                    <span>
+                        Pipeline configured for GitHub polling,
+                        Docker image publishing and website deployment.
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <section class="version">
+            <div class="version-box">
+                <h3>Deployment Update <span aria-hidden="true">✨</span></h3>
+                <p>
+                    This page is served by Nginx inside a Docker container.
+                    Update the HTML in GitHub to test your Jenkins CI/CD pipeline.
+                </p>
+                <span class="version-label">
+                    UI Version 3.0 — Purple &amp; Blue Edition
+                </span>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p><strong>AWS DevOps CI/CD Project</strong></p>
+        <p>GitHub → Jenkins → Docker → Docker Hub → AWS EC2 → Nginx</p>
+        <p>Built for learning, automation and continuous deployment.</p>
+    </footer>
+
+</body>
+</html>
+```
